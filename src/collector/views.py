@@ -17,6 +17,7 @@ import json
 #from django.db import transaction
 from . import UtilityOps as UtilityOps
 from urllib.parse import urlparse
+from urllib.parse import parse_qs
 from random import randint
 import csv
 import hashlib
@@ -78,6 +79,17 @@ def findImage(url):
 		if res.status_code == 200:
 			return turl
 		return None
+	elif host in ["drive.google.com"]:
+		path = urlparse(url).path
+		if path == '/open':
+			# example: https://drive.google.com/open?id=1wT9BAvWFugwZ3sKf1y1xGaqjrTE26yEV
+			turl = "https://drive.google.com/uc?export=download&id=" + parse_qs(urlparse(url).query)['id'][0]
+			return turl
+		
+		if path.startswith("/file/d/"):
+			# https://drive.google.com/file/d/1wT9BAvWFugwZ3sKf1y1xGaqjrTE26yEV/view
+			turl = "https://drive.google.com/uc?export=download&id=" + path.split('/')[3]
+			return turl
 	else:
 		return None
 
